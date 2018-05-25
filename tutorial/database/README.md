@@ -17,9 +17,9 @@ docker run -p 5432:5432 -v pgdata:/var/lib/postgresql/data -d -e POSTGRES_PASSWO
 
 ### Creating a database partition
 ````bash
-docker exec --user postgres -i db /usr/local/bin/createdb cloudia_gateway
+docker exec --user postgres -i db /usr/local/bin/createdb rabbitmq
 ````
 or
 ````bash
-docker exec --user postgres -it 76d928f8a441 /usr/local/bin/createdb cloudia_gateway
+docker exec --user postgres -it 76d928f8a441 /usr/local/bin/createdb rabbitmq
 ````
