@@ -12,3 +12,9 @@ docker exec --user postgres -i db /usr/local/bin/createdb rabbitmq
 or
 docker exec --user postgres -it <container-id> /usr/local/bin/createdb rabbitmq
 
+# Some SQL examples
+DELETE FROM public."Matchs";
+DELETE FROM public."Filters";
+DELETE FROM public."Rules";
+
+
