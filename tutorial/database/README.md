@@ -23,3 +23,10 @@ or
 ````bash
 docker exec --user postgres -it 76d928f8a441 /usr/local/bin/createdb rabbitmq
 ````
+
+### Some SQL examples
+````sql
+DELETE FROM public."Matchs";
+DELETE FROM public."Filters";
+DELETE FROM public."Rules";
+````
