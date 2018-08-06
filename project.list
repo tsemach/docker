@@ -3,6 +3,12 @@ containers/requirements.txt
 containers/Dockerfile
 containers/app.py
 containers/docker-compose.yml
+project.list
 README.md
 services/docker-compose.yml
+create-list.sh
 tutorial/database/database.run
+tutorial/database/README.md
+tutorial/rabbitmq/README.md
+tutorial/rabbitmq/rabbitmq.run
+tutorial/pgadmin/pgadmin4.run
