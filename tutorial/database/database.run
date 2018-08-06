@@ -1,1 +1,20 @@
 docker run -p 5432:5432 --name db -e POSTGRES_PASSWORD=postgres -d postgres:9.6.6-alpine
+
+docker volume create pgdata
+
+1) option-1: using predefine network
+docker run -p 5432:5432 --net the-net -v pgdata:/var/lib/postgresql/data --ip 10.1.0.2 -d -e POSTGRES_PASSWORD=somepassword --name db postgres:9.6.6-alpine
+
+2) option-2: using default bridge
+docker run -p 5432:5432 -v pgdata:/var/lib/postgresql/data -d -e POSTGRES_PASSWORD=somepassword --name db postgres:9.6.6-alpine
+
+docker exec --user postgres -i db /usr/local/bin/createdb rabbitmq
+or
+docker exec --user postgres -it <container-id> /usr/local/bin/createdb rabbitmq
+
+# Some SQL examples
+DELETE FROM public."Matchs";
+DELETE FROM public."Filters";
+DELETE FROM public."Rules";
+
+
