@@ -1,0 +1,9 @@
+# run redis image and given name is redis
+docker run --name redis -d -p 6379:6379 redis
+
+# quick connect to redis server by nc:
+nc -v localhost 6379
+SET server:name 'pygo'
+GET server:name
+
+pygo <= result is 

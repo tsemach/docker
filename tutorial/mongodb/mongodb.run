@@ -1,0 +1,6 @@
+
+# start mongo container
+docker run --name mongodb -p 27017:27017 -d mongo
+
+# enter into the container
+docker exec -it mongodb bash
