@@ -1,0 +1,2 @@
+docker run --name nginx -p 8081:80 -v /some/content:/usr/share/nginx/html:ro -d nginx
+
