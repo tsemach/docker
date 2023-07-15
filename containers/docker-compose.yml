@@ -14,5 +14,8 @@ services:
       - "8081:8081"
     networks:
       - webnet
+
+    environment:
+      - SERVICE="docker-compose"
 networks:
   webnet:

@@ -2,7 +2,7 @@
 docker build -t hello-world .
 
 ### Run local test
-docker run -p 8081:8081 -it hello-world
+docker run --env SERVICE=docker -p 8081:8081 -it hello-world
 
 ### Test with local docker-compose
 docker-compose up 
