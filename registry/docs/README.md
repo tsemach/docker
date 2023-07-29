@@ -111,3 +111,9 @@ Enter the pod as follow
 ````
 k exec -it mytest -- bash
 ````
+
+### docker registry username password
+username: dockerusername 
+password: dockerpassword
+
+k create secret docker-registry mydockercredentials --docker-server center-1:5000 --docker-username dockerusername --docker-password dockerpassword
