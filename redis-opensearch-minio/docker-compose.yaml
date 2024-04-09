@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.5.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - http.port=9210
+      # - plugins.security.disabled=true
+    volumes:
+      - opensearch:/usr/share/opensearch/data
+    ports:
+      - 9210:9210
+      - 9600:9600
+    networks:
+      - tsemach
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.5.0 # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+    container_name: opensearch-dashboards
+    ports:
+      - target: 5601
+        published: 5611
+    # expose:
+    #   - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9210"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
+    networks:
+      - tsemach
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - tsemach
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: ["server", "/data", "--console-address", ":9001"]
+    networks:
+      - tsemach
+
+volumes:
+  opensearch:
+    driver: local
+  redis-data:
+    driver: local
+  minio-data:
+    driver: local
+
+networks:
+  tsemach:
+    driver: bridge
+
