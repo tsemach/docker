@@ -117,3 +117,8 @@ username: dockerusername
 password: dockerpassword
 
 k create secret docker-registry mydockercredentials --docker-server center-1:5000 --docker-username dockerusername --docker-password dockerpassword
+
+# Create and Build MyDebian
+````bash
+docker build -f debian.dockerfile -t localhost:5000/mydebian .
+````
