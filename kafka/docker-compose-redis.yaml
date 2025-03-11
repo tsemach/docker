@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  redis-master:
+    image: redis:latest
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/master:/data
+    networks:
+      - redis-cluster-net
+
+  redis-slave:
+    image: redis:latest
+    command: redis-server --port 6380 --slaveof redis-master 6379
+    ports:
+      - "6380:6380"
+    volumes:
+      - ./data/slave:/data
+    depends_on:
+      - redis-master
+    networks:
+      - redis-cluster-net
+
+networks:
+  redis-cluster-net:

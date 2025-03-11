@@ -1,0 +1,160 @@
+version: '3'
+services:
+    mongodb:
+        image: 'mongo'
+        networks:
+            - elementor
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=elm
+            - MONGO_INITDB_ROOT_PASSWORD=elm123
+        volumes:
+            - .data/mongo:/data/db
+        ports:
+            - '27017-27019:27017-27019'
+
+    redis:
+      image: bitnami/redis:7.2.5
+      environment:
+        - ALLOW_EMPTY_PASSWORD=yes
+      networks:
+        - elementor
+      ports:
+        - 6379:6379
+
+    pubsub:
+      image: 3apag/pubsub-emulator
+      networks:
+        - elementor
+      environment:
+        - PUBSUB_PROJECT_ID=elementor-development
+        - PUBSUB_LISTEN_ADDRESS=0.0.0.0:8432
+      ports:
+        - 8432:8432
+      volumes:
+        - ./data/pubsub:/opt/data
+    
+    pubsub-http-proxy:
+      container_name: pubsub-http-proxy
+      depends_on:
+        - pubsub
+      environment:
+        - PUBSUB_EMULATOR_HOST=pubsub:8432
+        - PUBSUB_PROJECT_ID=elementor-development
+        - SUBSCRIPTIONS=platform.ecp-subscription.subscription:platform.ecp-subscription.subscription-hosting,cloud.network.cdn--cloud.purge-by-prefix
+        - PORT=2348
+      image: sombreroron/pubsub-http-proxy:1.1.1
+      networks:
+        - elementor
+      ports:
+        - 2348:2348
+    
+    postgresql:
+      container_name: temporal-postgresql
+      networks:
+        - elementor
+      environment:
+        POSTGRES_PASSWORD: temporal
+        POSTGRES_USER: temporal
+      image: postgres:13
+      # networks:
+      # - temporal-network
+      ports:
+        - 5432:5432
+    
+    permify:
+      image: ghcr.io/permify/permify
+      networks:
+        - elementor
+      restart: "always"
+      ports:
+        - "3476:3476"
+        - "3478:3478"
+      volumes:
+        - .:/app
+      depends_on:
+        - postgresql
+      command: 
+        - serve
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:3476/healthz"]
+        interval: 10s
+        retries: 10
+
+    temporal:
+      container_name: temporal
+      networks:
+        - elementor
+      depends_on:
+        - postgresql
+      environment:
+        - DB=postgresql
+        - DB_PORT=5432
+        - POSTGRES_USER=temporal
+        - POSTGRES_PWD=temporal
+        - POSTGRES_SEEDS=postgresql
+        - DYNAMIC_CONFIG_FILE_PATH=/etc/temporal/config/dynamicconfig/docker.yaml
+      image: temporalio/auto-setup:1.22.7.1
+      ports:
+        - 7233:7233
+      healthcheck:
+        test: ["CMD", "tctl", "--address", "temporal:7233", "workflow", "list"]
+        interval: 1s
+        timeout: 5s
+        retries: 30
+    
+    temporal-http-proxy:
+      container_name: temporal-http-proxy
+      depends_on:
+        temporal:
+            condition: service_healthy
+      environment:
+        - TEMPORAL_HOST=temporal:7233
+      image: sombreroron/temporal-http-proxy:1.0.0
+      networks:
+        - elementor
+      ports:
+        - 3327:3327
+
+    temporal-admin-tools:
+      container_name: temporal-admin-tools
+      depends_on:
+        - temporal
+      environment:
+        - TEMPORAL_CLI_ADDRESS=temporal:7233
+        - TEMPORAL_ADDRESS=temporal:7233
+      # https://github.com/temporalio/temporal/issues/2539
+      image: temporalio/admin-tools:1.22.7.1
+      networks:
+        - elementor
+      stdin_open: true
+      tty: true
+
+    temporal-web:
+      container_name: temporal-web
+      depends_on:
+        - temporal
+      environment:
+        - TEMPORAL_GRPC_ENDPOINT=temporal:7233
+        - TEMPORAL_PERMIT_WRITE_API=true
+      image: temporalio/web:1.15.0
+      networks:
+        - elementor
+      ports:
+        - 7234:8088
+
+    temporal-ui:
+      container_name: temporal-ui
+      depends_on:
+        - temporal
+      environment:
+        - TEMPORAL_ADDRESS=temporal:7233
+        - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      image: temporalio/ui:2.16.2
+      networks:
+        - elementor
+      ports:
+        - 7235:8080
+
+
+networks:
+    elementor:
